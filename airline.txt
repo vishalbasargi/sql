@@ -1,0 +1,135 @@
+CREATE DATABASE IF NOT EXISTS airline;
+USE airline;
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS Certified;
+DROP TABLE IF EXISTS Employees;
+DROP TABLE IF EXISTS Aircraft;
+DROP TABLE IF EXISTS Flights;
+SET FOREIGN_KEY_CHECKS = 1;
+
+CREATE TABLE Flights (
+    flno INTEGER PRIMARY KEY,
+    from_city VARCHAR(100),
+    to_city VARCHAR(100),
+    distance INTEGER,
+    departs TIME,
+    arrives TIME,
+    price INTEGER
+);
+
+CREATE TABLE Aircraft (
+    aid INTEGER PRIMARY KEY,
+    aname VARCHAR(100),
+    cruisingrange INTEGER
+);
+
+CREATE TABLE Employees (
+    eid INTEGER PRIMARY KEY,
+    ename VARCHAR(100),
+    salary INTEGER
+);
+
+CREATE TABLE Certified (
+    eid INTEGER,
+    aid INTEGER,
+    PRIMARY KEY (eid, aid),
+    FOREIGN KEY (eid) REFERENCES Employees(eid),
+    FOREIGN KEY (aid) REFERENCES Aircraft(aid)
+);
+
+INSERT INTO Flights (flno, from_city, to_city, distance, departs, arrives, price) VALUES 
+(1, 'Delhi', 'Mumbai', 1447, '06:00:00', '08:30:00', 4000),
+(2, 'Mumbai', 'Bangalore', 981, '07:00:00', '09:00:00', 3500),
+(3, 'Bangalore', 'Hyderabad', 501, '08:00:00', '09:30:00', 2500),
+(4, 'Hyderabad', 'Chennai', 627, '09:00:00', '10:30:00', 3000),
+(5, 'Chennai', 'Kolkata', 1368, '10:00:00', '12:30:00', 4500),
+(6, 'Kolkata', 'Delhi', 1311, '11:00:00', '13:30:00', 4200),
+(7, 'Delhi', 'Goa', 1500, '12:00:00', '14:30:00', 2000), -- Price is 2000
+(8, 'Goa', 'Pune', 503, '13:00:00', '14:30:00', 2700),
+(9, 'Pune', 'Ahmedabad', 661, '14:00:00', '15:30:00', 3200),
+(10, 'Ahmedabad', 'Jaipur', 625, '15:00:00', '16:30:00', 3100);
+
+INSERT INTO Aircraft (aid, aname, cruisingrange) VALUES 
+(1, '737', 3000),
+(2, 'A320', 3500),
+(3, '747', 8000),
+(4, 'A380', 8500),
+(5, '777', 9000),
+(6, 'A330', 6000),
+(7, '767', 6500),
+(8, 'A350', 8000),
+(9, '787', 7600),
+(10,  'A220', 3500);
+
+INSERT INTO Employees (eid, ename, salary) VALUES 
+(1, 'Amit', 1500), -- Salary is below 2000
+(2, 'Neha', 1800),  -- Salary is below 2000
+(3, 'Rajesh', 950000),
+(4, 'Sunita', 1600), -- Salary is below 2000
+(5, 'Anil', 780000),
+(6, 'Pooja', 800000),
+(7, 'Vikas', 910000),
+(8, 'Priya', 720000),
+(9, 'Ravi', 880000),
+(10, 'Sneha', 870000);
+
+INSERT INTO Certified (eid, aid) VALUES 
+(1, 1),
+(1, 2),
+(2, 3),
+(2, 4),
+(3, 5),
+(3, 6),
+(4, 7),
+(4, 8),
+(5, 9),
+(5, 10),
+(6, 1),
+(6, 3),
+(7, 5),
+(7, 7),
+(8, 9),
+(8, 10),
+(9, 2),
+(9, 4),
+(10, 6),
+(10, 8),
+(3, 1), 
+(4, 2), 
+(5, 3), 
+(6, 4), 
+(6, 5), 
+(7, 1), 
+(7, 2); 
+
+SELECT a.aname
+FROM Aircraft a
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Certified c
+    JOIN Employees e ON c.eid = e.eid
+    WHERE c.aid = a.aid AND e.salary <= 800000
+);
+
+
+SELECT c.eid, MAX(a.cruisingrange) AS max_cruisingrange
+FROM Certified c
+JOIN Aircraft a ON c.aid = a.aid
+GROUP BY c.eid
+HAVING COUNT(c.aid) > 3;
+
+
+SELECT e.ename
+FROM Employees e
+WHERE e.salary < (
+    SELECT MIN(f.price)
+    FROM Flights f
+    WHERE f.from_city = 'Delhi' AND f.to_city = 'Goa'
+);
+
+
+SELECT MAX(salary) AS second_highest_salary
+FROM Employees
+WHERE salary < (SELECT MAX(salary) FROM Employees);

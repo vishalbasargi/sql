@@ -1,0 +1,96 @@
+CREATE DATABASE IF NOT EXISTS sailors;
+USE sailors;
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS Reserves;
+DROP TABLE IF EXISTS Boats;
+DROP TABLE IF EXISTS Sailors;
+SET FOREIGN_KEY_CHECKS = 1;
+
+CREATE TABLE Sailors (
+    sid INTEGER PRIMARY KEY,
+    sname VARCHAR(50),
+    rating INTEGER,
+    age REAL
+);
+
+CREATE TABLE Boats (
+    bid INTEGER PRIMARY KEY,
+    bname VARCHAR(50),
+    color VARCHAR(50)
+);
+
+CREATE TABLE Reserves (
+    sid INTEGER,
+    bid INTEGER,
+    day DATE,
+    PRIMARY KEY (sid, bid, day),
+    FOREIGN KEY (sid) REFERENCES Sailors(sid),
+    FOREIGN KEY (bid) REFERENCES Boats(bid)
+);
+
+INSERT INTO Sailors (sid, sname, rating, age) VALUES
+(1, 'John', 5, 25.0),
+(2, 'Paul', 3, 24.0),
+(3, 'Mike', 7, 22.0),
+(4, 'Sam', 10, 20.0),
+(5, 'Tom', 8, 23.0),
+(6, 'Jerry', 5, 26.0),
+(7, 'Jake', 9, 21.0),
+(8, 'Chris', 3, 30.0),
+(9, 'Alex', 4, 19.0),
+(10, 'Nate', 6, 27.0);
+
+INSERT INTO Boats (bid, bname, color) VALUES
+(101, 'Boaty McBoatface', 'red'),
+(102, 'Sea Explorer', 'blue'),
+(103, 'Wave Rider', 'green'),
+(104, 'Sun Chaser', 'red'),
+(105, 'Ocean Breeze', 'yellow'),
+(106, 'Wind Surfer', 'blue'),
+(107, 'Storm Breaker', 'green'),
+(108, 'Coral Cruiser', 'red'),
+(109, 'Marine Voyager', 'yellow'),
+(110, 'Aqua Adventurer', 'blue');
+
+INSERT INTO Reserves (sid, bid, day) VALUES
+(1, 101, '2023-01-01'),
+(2, 102, '2023-02-01'),
+(3, 103, '2023-03-01'),
+(4, 104, '2023-04-01'),
+(5, 105, '2023-05-01'),
+(6, 106, '2023-06-01'),
+(7, 107, '2023-07-01'),
+(8, 108, '2023-08-01'),
+(9, 109, '2023-09-01'),
+(10, 110, '2023-10-01'),
+(1, 104, '2023-01-15'), 
+(4, 108, '2023-04-15'); 
+
+SELECT sname
+FROM Sailors
+WHERE sid IN (
+    SELECT DISTINCT r.sid
+    FROM Reserves r
+    WHERE r.bid IN (
+        SELECT bid
+        FROM Boats
+        WHERE color = 'red'
+    )
+)
+ORDER BY age;
+
+SELECT sname
+FROM Sailors s
+JOIN Reserves r ON s.sid = r.sid
+WHERE r.bid = 103;
+
+SELECT sname, age
+FROM Sailors
+ORDER BY age ASC
+LIMIT 1;
+
+SELECT rating, AVG(age) as average_age
+FROM Sailors
+GROUP BY rating
+HAVING COUNT(sid) >= 2;

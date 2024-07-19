@@ -1,0 +1,156 @@
+CREATE DATABASE IF NOT EXISTS company;
+USE company;
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS employee;
+DROP TABLE IF EXISTS department;
+DROP TABLE IF EXISTS dept_location;
+DROP TABLE IF EXISTS project;
+DROP TABLE IF EXISTS dependents;
+DROP TABLE IF EXISTS works_on;
+DROP VIEW IF EXISTS Dept_info;
+SET FOREIGN_KEY_CHECKS = 1;
+
+CREATE TABLE Employee (
+    F_name VARCHAR(100),
+    L_name VARCHAR(100),
+    Emp_id INTEGER PRIMARY KEY,
+    Bdate DATE,
+    Address VARCHAR(100),
+    Gender VARCHAR(1),
+    Salary INTEGER,
+    Super_Emp_id INTEGER,
+    D_no INTEGER
+);
+
+CREATE TABLE Department (
+    D_name VARCHAR(100),
+    D_no INTEGER PRIMARY KEY,
+    D_Mgr_id INTEGER,
+    Mgr_start_date DATE
+);
+
+CREATE TABLE Dept_Location (
+    D_no INTEGER,
+    D_location VARCHAR(100)
+);
+
+CREATE TABLE Project (
+    P_name VARCHAR(100),
+    P_number INTEGER PRIMARY KEY,
+    P_location VARCHAR(100),
+    D_no INTEGER
+);
+
+CREATE TABLE Works_on (
+    Emp_id INTEGER,
+    P_no INTEGER,
+    Hours INTEGER
+);
+
+CREATE TABLE Dependents (
+    Emp_id INTEGER,
+    Dependent_name VARCHAR(100),
+    Gender VARCHAR(1),
+    Bdate DATE,
+    Relationship VARCHAR(100)
+);
+
+INSERT INTO Department (D_name, D_no, D_Mgr_id, Mgr_start_date) VALUES
+('HR', 1, NULL, '2015-01-01'),
+('Engineering', 2, NULL, '2016-02-02'),
+('Marketing', 3, NULL, '2017-03-03');
+
+INSERT INTO Employee (F_name, L_name, Emp_id, Bdate, Address, Gender, Salary, Super_Emp_id, D_no) VALUES
+('John', 'Doe', 1, '1980-01-01', '123 Elm St', 'M', 60000, NULL, 1),
+('Jane', 'Smith', 2, '1985-02-02', '456 Oak St', 'F', 65000, 1, 2),
+('Jim', 'Beam', 3, '1990-03-03', '789 Pine St', 'M', 55000, 1, 1),
+('Jack', 'Daniels', 4, '1982-04-04', '101 Maple St', 'M', 70000, 2, 3),
+('Jill', 'Valentine', 5, '1983-05-05', '202 Birch St', 'F', 68000, 2, 2),
+('Chris', 'Redfield', 6, '1987-06-06', '303 Cedar St', 'M', 72000, 4, 3),
+('Claire', 'Redfield', 7, '1992-07-07', '404 Walnut St', 'F', 50000, 4, 1),
+('Albert', 'Wesker', 8, '1979-08-08', '505 Chestnut St', 'M', 80000, NULL, 3),
+('Leon', 'Kennedy', 9, '1988-09-09', '606 Hickory St', 'M', 60000, 8, 1),
+('Ada', 'Wong', 10, '1986-10-10', '707 Redwood St', 'F', 62000, 8, 3);
+
+UPDATE Department SET D_Mgr_id = 1 WHERE D_no = 1;
+UPDATE Department SET D_Mgr_id = 2 WHERE D_no = 2;
+UPDATE Department SET D_Mgr_id = 4 WHERE D_no = 3;
+
+INSERT INTO Dept_Location (D_no, D_location) VALUES
+(1, 'New York'),
+(1, 'Boston'),
+(2, 'San Francisco'),
+(2, 'Los Angeles'),
+(3, 'Chicago'),
+(3, 'Houston');
+
+INSERT INTO Project (P_name, P_number, P_location, D_no) VALUES
+('A', 1, 'New York', 1),
+('B', 2, 'San Francisco', 2),
+('C', 3, 'Chicago', 3),
+('D', 4, 'Boston', 1),
+('E', 5, 'Los Angeles', 2),
+('F', 6, 'Houston', 3),
+('G', 7, 'New York', 1),
+('H', 8, 'San Francisco', 2),
+('I', 9, 'Chicago', 3),
+('J', 10, 'Boston', 1);
+
+INSERT INTO Works_on (Emp_id, P_no, Hours) VALUES
+(1, 1, 10),
+(2, 2, 20),
+(3, 3, 30),
+(4, 4, 40),
+(5, 5, 25),
+(6, 6, 35),
+(7, 7, 15),
+(8, 8, 20),
+(9, 9, 30),
+(10, 10, 25);
+
+INSERT INTO Dependents (Emp_id, Dependent_name, Gender, Bdate, Relationship) VALUES
+(1, 'Anna', 'F', '2010-01-01', 'Daughter'),
+(2, 'Brian', 'M', '2012-02-02', 'Son'),
+(3, 'Cathy', 'F', '2015-03-03', 'Daughter'),
+(4, 'Danny', 'M', '2011-04-04', 'Son'),
+(5, 'Eva', 'F', '2013-05-05', 'Daughter'),
+(6, 'Frank', 'M', '2016-06-06', 'Son'),
+(7, 'Grace', 'F', '2017-07-07', 'Daughter'),
+(8, 'Helen', 'F', '2009-08-08', 'Daughter'),
+(9, 'Ian', 'M', '2014-09-09', 'Son'),
+(10, 'Jenny', 'F', '2012-10-10', 'Daughter');
+
+ALTER TABLE Employee ADD CONSTRAINT fk_supervisor FOREIGN KEY (Super_Emp_id) REFERENCES Employee(Emp_id);
+ALTER TABLE Employee ADD CONSTRAINT fk_department FOREIGN KEY (D_no) REFERENCES Department(D_no);
+ALTER TABLE Department ADD CONSTRAINT fk_manager FOREIGN KEY (D_Mgr_id) REFERENCES Employee(Emp_id);
+ALTER TABLE Dept_Location ADD CONSTRAINT fk_dept_location FOREIGN KEY (D_no) REFERENCES Department(D_no);
+ALTER TABLE Project ADD CONSTRAINT fk_project_department FOREIGN KEY (D_no) REFERENCES Department(D_no);
+ALTER TABLE Works_on ADD CONSTRAINT fk_works_on_employee FOREIGN KEY (Emp_id) REFERENCES Employee(Emp_id);
+ALTER TABLE Works_on ADD CONSTRAINT fk_works_on_project FOREIGN KEY (P_no) REFERENCES Project(P_number);
+ALTER TABLE Dependents ADD CONSTRAINT fk_dependent_employee FOREIGN KEY (Emp_id) REFERENCES Employee(Emp_id);
+ALTER TABLE Dependents DROP FOREIGN KEY fk_dependent_employee;
+
+
+
+SELECT e1.F_name, e1.L_name, e1.Address
+FROM Employee e1
+JOIN Employee e2 ON e1.D_no = e2.D_no
+WHERE e1.Emp_id != e2.Emp_id;
+
+SELECT e.F_name, e.L_name, p.P_name, d.D_name
+FROM Employee e
+JOIN Works_on w ON e.Emp_id = w.Emp_id
+JOIN Project p ON w.P_no = p.P_number
+JOIN Department d ON e.D_no = d.D_no
+ORDER BY d.D_name, e.L_name, e.F_name;
+
+CREATE VIEW Dept_info AS
+SELECT d.D_name, COUNT(e.Emp_id) AS Number_of_employees, SUM(e.Salary) AS Total_salary
+FROM Department d
+LEFT JOIN Employee e ON d.D_no = e.D_no
+GROUP BY d.D_name;
+
+
+

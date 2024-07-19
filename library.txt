@@ -1,0 +1,126 @@
+CREATE DATABASE IF NOT EXISTS libraryy;
+USE libraryy;
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS student;
+DROP TABLE IF EXISTS memb;
+DROP TABLE IF EXISTS books;
+DROP TABLE IF EXISTS iss;
+SET FOREIGN_KEY_CHECKS = 1;
+
+CREATE TABLE IF NOT EXISTS student (
+    stud_no INT PRIMARY KEY,
+    stud_name VARCHAR(4) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS memb (
+    mem_no INT PRIMARY KEY  ,
+    stud_no INT,
+    FOREIGN KEY (stud_no) REFERENCES student(stud_no)
+);
+
+CREATE TABLE IF NOT EXISTS books (
+    book_id INT PRIMARY KEY,
+    book_name VARCHAR(34) NOT NULL,
+    author VARCHAR(34) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS iss (
+    iss_no INT PRIMARY KEY,
+    iss_date DATE NOT NULL,
+    mem_no INT,
+    book_id INT,
+    FOREIGN KEY (mem_no) REFERENCES memb(mem_no),
+    FOREIGN KEY (book_id) REFERENCES books(book_id)
+);
+
+INSERT INTO student (stud_no, stud_name) VALUES
+(1, 'pipo'),
+(2, 'nopo'),
+(3, 'momo'),
+(4, 'nunu'),
+(5, 'bobi'),
+(6, 'ravi'),
+(7, 'tina'),
+(8, 'mina'),
+(9, 'gopi'),
+(10,'sita');
+
+INSERT INTO memb (mem_no, stud_no) VALUES 
+(100, 1), 
+(101, 2), 
+(102, 3), 
+(103, 4), 
+(104, 5),
+(105, 6),
+(106, 7),
+(107, 8),
+(108, 9),
+(109, 10);
+
+INSERT INTO books (book_id, book_name, author) VALUES
+(324, 'book thief', 'ahper'),
+(649, 'iewrn', 'rwber'),
+(976, 'ooo', 'rtbfdpooo'),
+(298, 'momimio', 'pewiof'),
+(113, 'eroing', 'aierng'),
+(210, 'philos', 'socrates'),
+(315, 'warpeace', 'tolstoy'),
+(421, 'pythons', 'rossum'),
+(527, 'algorithms', 'cormen'),
+(633, 'dbms', 'silberschatz');
+
+
+INSERT INTO iss (iss_no, iss_date, mem_no, book_id) VALUES
+(45, STR_TO_DATE('05-05-2023', '%d-%m-%Y'), 100, 324),
+(90, STR_TO_DATE('02-09-2021', '%d-%m-%Y'), 100, 649),
+(51, STR_TO_DATE('30-07-2023', '%d-%m-%Y'), 101, 976),
+(23, STR_TO_DATE('12-08-2024', '%d-%m-%Y'), 102, 298),
+(80, STR_TO_DATE('23-01-2024', '%d-%m-%Y'), 103, 113),
+(43, STR_TO_DATE('12-08-2024', '%d-%m-%Y'), 102, 113),
+(10, STR_TO_DATE('23-01-2024', '%d-%m-%Y'), 104, 324),
+(55, STR_TO_DATE('15-05-2023', '%d-%m-%Y'), 105, 210),
+(65, STR_TO_DATE('20-06-2023', '%d-%m-%Y'), 106, 315),
+(75, STR_TO_DATE('25-07-2023', '%d-%m-%Y'), 107, 421),
+(85, STR_TO_DATE('30-08-2023', '%d-%m-%Y'), 108, 527),
+(95, STR_TO_DATE('05-09-2023', '%d-%m-%Y'), 109, 633);
+
+SELECT * FROM student;
+SELECT * FROM memb;
+SELECT * FROM books;
+SELECT * FROM iss;
+
+SELECT s.stud_name, m.mem_no
+FROM student s, memb m
+WHERE s.stud_no = m.stud_no;
+
+SELECT s.stud_name, b.book_name
+FROM student s, memb m, iss i, books b
+WHERE i.mem_no = m.mem_no
+  AND m.stud_no = s.stud_no
+  AND i.book_id = b.book_id
+  AND i.iss_date = STR_TO_DATE('02-09-2021', '%d-%m-%Y');
+
+SELECT s.stud_name, COUNT(i.book_id) AS book_count
+FROM student s
+JOIN memb m ON s.stud_no = m.stud_no 
+JOIN iss i ON m.mem_no = i.mem_no
+GROUP BY s.stud_name;
+
+SELECT s.stud_name, COUNT(i.book_id) AS book_count 
+FROM student s, iss i, memb m
+WHERE s.stud_no = m.stud_no
+AND i.mem_no = m.mem_no
+GROUP BY s.stud_name;
+
+SELECT b.book_name
+FROM iss i
+JOIN memb m ON i.mem_no = m.mem_no
+JOIN books b ON i.book_id = b.book_id
+WHERE m.stud_no = 3;
+
+SELECT b.book_name
+FROM iss i, memb m, books b
+WHERE i.mem_no = m.mem_no
+AND i.book_id = b.book_id
+AND m.stud_no = 5;
